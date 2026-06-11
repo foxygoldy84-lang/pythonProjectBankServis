@@ -1,0 +1,37 @@
+[project]
+name = "pythonprojectbankservis"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Anna Makarova",email = "foxygoldy84@gmail.com"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pandas (>=3.0.3,<4.0.0)",
+    "openpyxl (>=3.1.5,<4.0.0)",
+    "requests (>=2.34.2,<3.0.0)",
+    "pytest (>=9.0.3,<10.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "autopep8 (>=2.3.2,<3.0.0)",
+    "isort (>=8.0.1,<9.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "poethepoet (>=0.46.0,<0.47.0)",
+    "black (>=26.5.1,<27.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
+]
+
+[tool.poe.tasks.fix]
+sequence = [
+    { cmd = "isort src/" },
+    { cmd = "autopep8 --in-place --recursive src/" },
+    { cmd = "black src/" },
+    { cmd = "flake8 src/" }
+]
