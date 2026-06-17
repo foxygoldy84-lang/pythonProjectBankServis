@@ -23,9 +23,7 @@ def save_report_to_file(filename: Optional[str] = None) -> Callable:
                 result = func(*args, **kwargs)
 
                 # Определяем имя файла: переданное или по умолчанию
-                actual_filename = (
-                    filename or f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-                )
+                actual_filename = filename or f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
                 # Записываем результат в файл
                 if isinstance(result, pd.DataFrame):
@@ -33,9 +31,7 @@ def save_report_to_file(filename: Optional[str] = None) -> Callable:
                         result.to_excel(actual_filename, index=False)
                     else:
                         result.to_csv(actual_filename, index=False, encoding="utf-8")
-                    logger.info(
-                        f"Отчет {func.__name__} успешно сохранен в {actual_filename}"
-                    )
+                    logger.info(f"Отчет {func.__name__} успешно сохранен в {actual_filename}")
 
                 return result
 
@@ -51,9 +47,7 @@ def save_report_to_file(filename: Optional[str] = None) -> Callable:
 
 
 @save_report_to_file(filename="spending_by_weekday.csv")
-def spending_by_weekday(
-    transactions: pd.DataFrame, date: Optional[str] = None
-) -> pd.DataFrame:
+def spending_by_weekday(transactions: pd.DataFrame, date: Optional[str] = None) -> pd.DataFrame:
     """
     Принимает DataFrame с транзакциями и возвращает средние траты
     в каждый из дней недели за последние три месяца от переданной даты.
@@ -71,9 +65,7 @@ def spending_by_weekday(
         target_date = pd.Timestamp(datetime.now())
 
     # Приводим даты к формату datetime для фильтрации
-    transactions["Дата операции"] = pd.to_datetime(
-        transactions["Дата операции"], dayfirst=True
-    )
+    transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], dayfirst=True)
     start_date = target_date - pd.Timedelta(days=90)
 
     # Фильтруем только расходы за последние 3 месяца
@@ -99,16 +91,10 @@ def spending_by_weekday(
         "Saturday": "Суббота",
         "Sunday": "Воскресенье",
     }
-    filtered_df["День недели"] = (
-        filtered_df["Дата операции"].dt.day_name().map(weekdays_map)
-    )
+    filtered_df["День недели"] = filtered_df["Дата операции"].dt.day_name().map(weekdays_map)
 
     # Считаем средние траты и округляем их
-    result = (
-        filtered_df.groupby("День недели", observed=False)["Сумма операции"]
-        .mean()
-        .reset_index()
-    )
+    result = filtered_df.groupby("День недели", observed=False)["Сумма операции"].mean().reset_index()
     result.columns = ["День недели", "Средние траты"]
     result["Средние траты"] = result["Средние траты"].round().astype(int)
 
@@ -122,8 +108,6 @@ def spending_by_weekday(
         "Суббота",
         "Воскресенье",
     ]
-    result["День недели"] = pd.Categorical(
-        result["День недели"], categories=days_order, ordered=True
-    )
+    result["День недели"] = pd.Categorical(result["День недели"], categories=days_order, ordered=True)
 
     return result.sort_values("День недели")
