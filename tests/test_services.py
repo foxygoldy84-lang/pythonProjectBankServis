@@ -1,8 +1,6 @@
 from src.services import investment_bank, process_bank_search
 
 
-from src.services import investment_bank
-
 def test_investment_bank_calculation():
     """Тест: правильность округления сумм в инвесткопилке по формату ТЗ."""
     test_transactions = [
