@@ -11,9 +11,7 @@ os.makedirs("logs", exist_ok=True)
 # Настройка логера в моем стиле
 logger = logging.getLogger("utils")
 file_handler = logging.FileHandler("logs/utils.log", mode="w", encoding="utf-8")
-file_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
@@ -61,9 +59,7 @@ def read_transactions_xlsx(file_path: str) -> List[Dict[str, Any]]:
             }
             transactions.append(transaction)
 
-        logger.info(
-            f"Excel успешно обработан для сервисов. Найдено транзакций: {len(transactions)}"
-        )
+        logger.info(f"Excel успешно обработан для сервисов. Найдено транзакций: {len(transactions)}")
         return transactions
     except OSError as e:
         logger.error(f"Ошибка ввода-вывода при чтении Excel-файла {file_path}: {e}")

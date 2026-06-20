@@ -31,7 +31,16 @@ dev = [
 [tool.poe.tasks.fix]
 sequence = [
     { cmd = "isort src/" },
-    { cmd = "autopep8 --in-place --recursive src/" },
     { cmd = "black src/" },
     { cmd = "flake8 src/" }
 ]
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 120
+

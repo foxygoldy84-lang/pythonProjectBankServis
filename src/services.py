@@ -2,50 +2,45 @@ import logging
 import re
 from typing import Any, Dict, List
 
-# Настраиваем логер для модуля сервисов
+import pandas as pd
+
 logger = logging.getLogger("services")
 
 
-def investment_bank(
-    month: str, transactions: List[Dict[str, Any]], limit: int
-) -> float:
-    """
-    Сервис 'Инвесткопилка'.
-    Использует элементы функционального программирования (filter, lambda).
-    Округляет траты до заданного порога и считает накопления.
-    """
-    logger.info(
-        f"Расчет инвесткопилки за месяц {month} с порогом округления {limit} руб."
-    )
+def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) -> float:
+    """Сервис 'Инвесткопилка'.
 
-    # Фильтруем транзакции: оставляем только нужный месяц и только расходы (сумма < 0)
-    filtered_transactions = filter(
-        lambda t: str(t.get("Дата операции")).startswith(month)
-        and float(t.get("Сумма операции", 0)) < 0,
-        transactions,
-    )
+    Корректно приводит любые форматы дат из Excel к YYYY-MM для точной фильтрации.
+    """
+    logger.info(f"Расчет инвесткопилки за месяц {month} с порогом {limit}")
+
+    def match_month(item: Dict[str, Any]) -> bool:
+        date_val = item.get("Дата операции") or item.get("Дата")
+        if not date_val:
+            return False
+        try:
+            # Надежно парсим дату через Pandas и приводим к единому формату YYYY-MM
+            dt = pd.to_datetime(date_val, dayfirst=True)
+            return dt.strftime("%Y-%m") == month and float(item.get("Сумма операции", 0)) < 0
+        except (ValueError, TypeError):
+            return False
+
+    filtered_transactions = filter(match_month, transactions)
 
     total_saved = 0.0
-
     for t in filtered_transactions:
-        amount = abs(float(t["Сумма операции"]))
-        # Если сумма не делится на лимит ровно, вычисляем хвостик для копилки
+        amount = abs(float(t.get("Сумма операции", 0)))
         if amount % limit != 0:
             rounded_amount = ((amount // limit) + 1) * limit
             total_saved += rounded_amount - amount
 
-    logger.info(
-        f"Расчет копилки завершен. Успешно отложено: {round(total_saved, 2)} руб."
-    )
     return round(total_saved, 2)
 
 
-def process_bank_search(
-    data: List[Dict[str, Any]], search: str
-) -> List[Dict[str, Any]]:
-    """
-    Твоя функция 'Простой поиск' из прошлого проекта.
-    Регистронезависимо ищет совпадения по строке в описании или категории.
+def process_bank_search(data: List[Dict[str, Any]], search: str) -> List[Dict[str, Any]]:
+    """Простой поиск по подстроке.
+
+    Возвращает список всех найденных транзакций для полного вывода по ТЗ.
     """
     logger.info(f"Запуск простого поиска по строке: '{search}'")
     filtered_data = []
@@ -54,10 +49,7 @@ def process_bank_search(
     for transaction in data:
         description = str(transaction.get("Описание", ""))
         category = str(transaction.get("Категория", ""))
-
-        # Расширенный поиск: проверяем совпадение и в описании, и в категории
         if pattern.search(description) or pattern.search(category):
             filtered_data.append(transaction)
 
-    logger.info(f"Поиск завершен. Найдено совпадений: {len(filtered_data)}")
     return filtered_data
